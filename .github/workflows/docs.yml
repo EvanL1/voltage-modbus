@@ -1,0 +1,123 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  docs:
+    name: Generate and Deploy Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+        
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+          
+    - name: Cache target directory
+      uses: actions/cache@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-target-
+    
+    - name: Build project
+      run: cargo build --all-features
+      
+    - name: Run tests
+      run: cargo test --all-features
+      
+    - name: Generate documentation
+      run: cargo doc --no-deps --all-features --document-private-items
+      
+    - name: Add index.html redirect
+      run: |
+        echo '<meta http-equiv="refresh" content="0; url=voltage_modbus">' > target/doc/index.html
+        
+    - name: Setup Pages
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: actions/configure-pages@v3
+      
+    - name: Upload Pages artifact
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: target/doc
+        
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      id: deployment
+      uses: actions/deploy-pages@v2
+
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        rust: [stable, beta, nightly]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Rust ${{ matrix.rust }}
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ matrix.rust }}
+        
+    - name: Cache cargo
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-${{ matrix.rust }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.rust }}-cargo-
+    
+    - name: Build
+      run: cargo build --all-features
+      
+    - name: Test
+      run: cargo test --all-features
+      
+    - name: Check formatting
+      if: matrix.rust == 'stable'
+      run: cargo fmt -- --check
+      
+    - name: Run clippy
+      if: matrix.rust == 'stable'
+      run: cargo clippy --all-features -- -D warnings
+
+# Required for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Ensure only one deployment runs at a time
+concurrency:
+  group: "pages"
+  cancel-in-progress: false 
