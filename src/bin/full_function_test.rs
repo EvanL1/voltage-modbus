@@ -1,7 +1,7 @@
 /// Voltage Modbus Full Function Test Client
 /// 
 /// Author: Evan Liu <evan.liu@voltageenergy.com>
-/// 测试所有Modbus功能码，包括读写操作
+/// Tests all Modbus function codes including read and write operations
 
 use std::time::Duration;
 use voltage_modbus::transport::{TcpTransport, ModbusTransport};
@@ -16,64 +16,64 @@ async fn main() -> ModbusResult<()> {
 
     println!("🧪 Voltage Modbus Full Function Test");
     println!("====================================");
-    println!("测试所有标准Modbus功能码");
+    println!("Testing all standard Modbus function codes");
     println!();
 
     let address = "127.0.0.1:5020".parse()
-        .map_err(|e| voltage_modbus::error::ModbusError::invalid_data(format!("地址解析错误: {}", e)))?;
+        .map_err(|e| voltage_modbus::error::ModbusError::invalid_data(format!("Address parse error: {}", e)))?;
     let timeout = Duration::from_millis(3000);
     
-    println!("📡 连接到服务器 {}...", address);
+    println!("📡 Connecting to server {}...", address);
     let mut transport = TcpTransport::new(address, timeout).await?;
-    println!("✅ 连接成功!");
+    println!("✅ Connection successful!");
     println!();
 
-    // 测试1: 读取线圈 (0x01)
-    println!("🧪 测试1: 读取线圈 (Function Code 0x01)");
+    // Test 1: Read Coils (0x01)
+    println!("🧪 Test 1: Read Coils (Function Code 0x01)");
     test_read_coils(&mut transport).await?;
     
-    // 测试2: 读取离散输入 (0x02)  
-    println!("\n🧪 测试2: 读取离散输入 (Function Code 0x02)");
+    // Test 2: Read Discrete Inputs (0x02)  
+    println!("\n🧪 Test 2: Read Discrete Inputs (Function Code 0x02)");
     test_read_discrete_inputs(&mut transport).await?;
     
-    // 测试3: 读取保持寄存器 (0x03)
-    println!("\n🧪 测试3: 读取保持寄存器 (Function Code 0x03)");
+    // Test 3: Read Holding Registers (0x03)
+    println!("\n🧪 Test 3: Read Holding Registers (Function Code 0x03)");
     test_read_holding_registers(&mut transport).await?;
     
-    // 测试4: 读取输入寄存器 (0x04)
-    println!("\n🧪 测试4: 读取输入寄存器 (Function Code 0x04)");
+    // Test 4: Read Input Registers (0x04)
+    println!("\n🧪 Test 4: Read Input Registers (Function Code 0x04)");
     test_read_input_registers(&mut transport).await?;
     
-    // 测试5: 写入单个线圈 (0x05)
-    println!("\n🧪 测试5: 写入单个线圈 (Function Code 0x05)");
+    // Test 5: Write Single Coil (0x05)
+    println!("\n🧪 Test 5: Write Single Coil (Function Code 0x05)");
     test_write_single_coil(&mut transport).await?;
     
-    // 测试6: 写入单个寄存器 (0x06)
-    println!("\n🧪 测试6: 写入单个寄存器 (Function Code 0x06)");
+    // Test 6: Write Single Register (0x06)
+    println!("\n🧪 Test 6: Write Single Register (Function Code 0x06)");
     test_write_single_register(&mut transport).await?;
     
-    // 测试7: 写入多个线圈 (0x0F)
-    println!("\n🧪 测试7: 写入多个线圈 (Function Code 0x0F)");
+    // Test 7: Write Multiple Coils (0x0F)
+    println!("\n🧪 Test 7: Write Multiple Coils (Function Code 0x0F)");
     test_write_multiple_coils(&mut transport).await?;
     
-    // 测试8: 写入多个寄存器 (0x10)
-    println!("\n🧪 测试8: 写入多个寄存器 (Function Code 0x10)");
+    // Test 8: Write Multiple Registers (0x10)
+    println!("\n🧪 Test 8: Write Multiple Registers (Function Code 0x10)");
     test_write_multiple_registers(&mut transport).await?;
 
-    // 获取最终统计
+    // Get final statistics
     let stats = transport.get_stats();
-    println!("\n📊 测试统计总结:");
-    println!("  总请求数: {}", stats.requests_sent);
-    println!("  总响应数: {}", stats.responses_received);
-    println!("  成功率: {:.1}%", (stats.responses_received as f64 / stats.requests_sent as f64) * 100.0);
-    println!("  总错误数: {}", stats.errors);
-    println!("  总超时数: {}", stats.timeouts);
-    println!("  发送字节: {} bytes", stats.bytes_sent);
-    println!("  接收字节: {} bytes", stats.bytes_received);
+    println!("\n📊 Test Statistics Summary:");
+    println!("  Total requests: {}", stats.requests_sent);
+    println!("  Total responses: {}", stats.responses_received);
+    println!("  Success rate: {:.1}%", (stats.responses_received as f64 / stats.requests_sent as f64) * 100.0);
+    println!("  Total errors: {}", stats.errors);
+    println!("  Total timeouts: {}", stats.timeouts);
+    println!("  Bytes sent: {} bytes", stats.bytes_sent);
+    println!("  Bytes received: {} bytes", stats.bytes_received);
 
     transport.close().await?;
     
-    println!("\n🎉 所有功能测试完成!");
+    println!("\n🎉 All function tests completed!");
     Ok(())
 }
 
@@ -82,10 +82,10 @@ async fn test_read_coils(transport: &mut TcpTransport) -> ModbusResult<()> {
     
     match transport.request(&request).await {
         Ok(response) => {
-            println!("  ✅ 读取线圈成功");
+            println!("  ✅ Read coils successful");
             if !response.data.is_empty() {
                 let byte_count = response.data[0];
-                print!("  📊 线圈状态 (地址0-9): ");
+                print!("  📊 Coil states (address 0-9): ");
                 
                 for i in 0..10 {
                     let byte_index = (i / 8) as usize + 1;
@@ -96,11 +96,11 @@ async fn test_read_coils(transport: &mut TcpTransport) -> ModbusResult<()> {
                     }
                 }
                 println!();
-                println!("  📦 字节数: {}", byte_count);
+                println!("  📦 Byte count: {}", byte_count);
             }
         }
         Err(e) => {
-            println!("  ❌ 读取线圈失败: {}", e);
+            println!("  ❌ Read coils failed: {}", e);
         }
     }
     Ok(())
@@ -111,10 +111,10 @@ async fn test_read_discrete_inputs(transport: &mut TcpTransport) -> ModbusResult
     
     match transport.request(&request).await {
         Ok(response) => {
-            println!("  ✅ 读取离散输入成功");
+            println!("  ✅ Read discrete inputs successful");
             if !response.data.is_empty() {
                 let byte_count = response.data[0];
-                print!("  📊 输入状态 (地址0-7): ");
+                print!("  📊 Input states (address 0-7): ");
                 
                 for i in 0..8 {
                     let byte_index = (i / 8) as usize + 1;
@@ -125,11 +125,11 @@ async fn test_read_discrete_inputs(transport: &mut TcpTransport) -> ModbusResult
                     }
                 }
                 println!();
-                println!("  📦 字节数: {}", byte_count);
+                println!("  📦 Byte count: {}", byte_count);
             }
         }
         Err(e) => {
-            println!("  ❌ 读取离散输入失败: {}", e);
+            println!("  ❌ Read discrete inputs failed: {}", e);
         }
     }
     Ok(())
@@ -140,10 +140,10 @@ async fn test_read_holding_registers(transport: &mut TcpTransport) -> ModbusResu
     
     match transport.request(&request).await {
         Ok(response) => {
-            println!("  ✅ 读取保持寄存器成功");
+            println!("  ✅ Read holding registers successful");
             if response.data.len() >= 1 {
                 let byte_count = response.data[0];
-                print!("  📊 寄存器值 (地址0-4): ");
+                print!("  📊 Register values (address 0-4): ");
                 
                 for i in 0..5 {
                     let offset = 1 + i * 2;
@@ -153,11 +153,11 @@ async fn test_read_holding_registers(transport: &mut TcpTransport) -> ModbusResu
                     }
                 }
                 println!();
-                println!("  📦 字节数: {}", byte_count);
+                println!("  📦 Byte count: {}", byte_count);
             }
         }
         Err(e) => {
-            println!("  ❌ 读取保持寄存器失败: {}", e);
+            println!("  ❌ Read holding registers failed: {}", e);
         }
     }
     Ok(())
@@ -168,10 +168,10 @@ async fn test_read_input_registers(transport: &mut TcpTransport) -> ModbusResult
     
     match transport.request(&request).await {
         Ok(response) => {
-            println!("  ✅ 读取输入寄存器成功");
+            println!("  ✅ Read input registers successful");
             if response.data.len() >= 1 {
                 let byte_count = response.data[0];
-                print!("  📊 寄存器值 (地址0-2): ");
+                print!("  📊 Register values (address 0-2): ");
                 
                 for i in 0..3 {
                     let offset = 1 + i * 2;
@@ -181,191 +181,202 @@ async fn test_read_input_registers(transport: &mut TcpTransport) -> ModbusResult
                     }
                 }
                 println!();
-                println!("  📦 字节数: {}", byte_count);
+                println!("  📦 Byte count: {}", byte_count);
             }
         }
         Err(e) => {
-            println!("  ❌ 读取输入寄存器失败: {}", e);
+            println!("  ❌ Read input registers failed: {}", e);
         }
     }
     Ok(())
 }
 
 async fn test_write_single_coil(transport: &mut TcpTransport) -> ModbusResult<()> {
-    // 创建写入单个线圈的请求
+    // Create write single coil request
     let request = ModbusRequest {
         slave_id: 1,
         function: ModbusFunction::WriteSingleCoil,
         address: 100,
         quantity: 1,
-        data: vec![1], // true
+        data: vec![0xFF, 0x00], // ON state
     };
     
     match transport.request(&request).await {
         Ok(response) => {
-            println!("  ✅ 写入单个线圈成功");
-            println!("  📝 写入地址100, 值: ON");
-            println!("  📦 响应数据长度: {} bytes", response.data.len());
-            
-            // 验证写入 - 读取刚写入的线圈
-            let read_request = ModbusRequest::new_read(1, ModbusFunction::ReadCoils, 100, 1);
-            match transport.request(&read_request).await {
-                Ok(read_response) => {
-                    if read_response.data.len() >= 2 {
-                        let bit_value = (read_response.data[1] & 0x01) != 0;
-                        println!("  🔍 验证读取: {} ({})", if bit_value { "ON" } else { "OFF" }, if bit_value { "✅" } else { "❌" });
-                    }
-                }
-                Err(e) => {
-                    println!("  ⚠️  验证读取失败: {}", e);
-                }
+            println!("  ✅ Write single coil successful");
+            if response.data.len() >= 4 {
+                let address = u16::from_be_bytes([response.data[0], response.data[1]]);
+                let value = u16::from_be_bytes([response.data[2], response.data[3]]);
+                println!("  📍 Address: {}", address);
+                println!("  📊 Value: 0x{:04x} ({})", value, if value == 0xFF00 { "ON" } else { "OFF" });
             }
         }
         Err(e) => {
-            println!("  ❌ 写入单个线圈失败: {}", e);
+            println!("  ❌ Write single coil failed: {}", e);
         }
     }
+    
+    // Test reading back the written value
+    println!("  🔄 Verifying written value...");
+    let read_request = ModbusRequest::new_read(1, ModbusFunction::ReadCoils, 100, 1);
+    
+    match transport.request(&read_request).await {
+        Ok(response) => {
+            if !response.data.is_empty() && response.data.len() >= 2 {
+                let written_value = (response.data[1] & 0x01) != 0;
+                println!("  ✅ Verification successful: coil is {}", if written_value { "ON" } else { "OFF" });
+            }
+        }
+        Err(e) => {
+            println!("  ⚠️  Verification failed: {}", e);
+        }
+    }
+    
     Ok(())
 }
 
 async fn test_write_single_register(transport: &mut TcpTransport) -> ModbusResult<()> {
-    // 创建写入单个寄存器的请求
-    let test_value: u16 = 0xABCD;
+    // Create write single register request
     let request = ModbusRequest {
         slave_id: 1,
         function: ModbusFunction::WriteSingleRegister,
         address: 200,
         quantity: 1,
-        data: test_value.to_be_bytes().to_vec(),
+        data: vec![0x12, 0x34], // Value 0x1234
     };
     
     match transport.request(&request).await {
         Ok(response) => {
-            println!("  ✅ 写入单个寄存器成功");
-            println!("  📝 写入地址200, 值: 0x{:04X}", test_value);
-            println!("  📦 响应数据长度: {} bytes", response.data.len());
-            
-            // 验证写入 - 读取刚写入的寄存器
-            let read_request = ModbusRequest::new_read(1, ModbusFunction::ReadHoldingRegisters, 200, 1);
-            match transport.request(&read_request).await {
-                Ok(read_response) => {
-                    if read_response.data.len() >= 3 {
-                        let value = u16::from_be_bytes([read_response.data[1], read_response.data[2]]);
-                        println!("  🔍 验证读取: 0x{:04X} ({})", value, if value == test_value { "✅" } else { "❌" });
-                    }
-                }
-                Err(e) => {
-                    println!("  ⚠️  验证读取失败: {}", e);
-                }
+            println!("  ✅ Write single register successful");
+            if response.data.len() >= 4 {
+                let address = u16::from_be_bytes([response.data[0], response.data[1]]);
+                let value = u16::from_be_bytes([response.data[2], response.data[3]]);
+                println!("  📍 Address: {}", address);
+                println!("  📊 Value: 0x{:04x} ({})", value, value);
             }
         }
         Err(e) => {
-            println!("  ❌ 写入单个寄存器失败: {}", e);
+            println!("  ❌ Write single register failed: {}", e);
         }
     }
+    
+    // Test reading back the written value
+    println!("  🔄 Verifying written value...");
+    let read_request = ModbusRequest::new_read(1, ModbusFunction::ReadHoldingRegisters, 200, 1);
+    
+    match transport.request(&read_request).await {
+        Ok(response) => {
+            if response.data.len() >= 3 {
+                let written_value = u16::from_be_bytes([response.data[1], response.data[2]]);
+                println!("  ✅ Verification successful: register value is 0x{:04x}", written_value);
+            }
+        }
+        Err(e) => {
+            println!("  ⚠️  Verification failed: {}", e);
+        }
+    }
+    
     Ok(())
 }
 
 async fn test_write_multiple_coils(transport: &mut TcpTransport) -> ModbusResult<()> {
-    // 创建写入多个线圈的请求 - 写入8个线圈的模式: 10101010
-    let coil_values = vec![true, false, true, false, true, false, true, false];
-    let mut data = Vec::new();
-    
-    // 将布尔值打包成字节
-    let mut byte_value = 0u8;
-    for (i, &coil) in coil_values.iter().enumerate() {
-        if coil {
-            byte_value |= 1 << i;
-        }
-    }
-    data.push(1); // 字节数
-    data.push(byte_value);
-    
+    // Create write multiple coils request - write 8 coils with pattern: 10101010
     let request = ModbusRequest {
         slave_id: 1,
         function: ModbusFunction::WriteMultipleCoils,
         address: 300,
         quantity: 8,
-        data,
+        data: vec![0x01, 0xAA], // 1 byte count + pattern 10101010
     };
     
     match transport.request(&request).await {
         Ok(response) => {
-            println!("  ✅ 写入多个线圈成功");
-            println!("  📝 写入地址300-307, 模式: 10101010");
-            println!("  📦 响应数据长度: {} bytes", response.data.len());
-            
-            // 验证写入 - 读取刚写入的线圈
-            let read_request = ModbusRequest::new_read(1, ModbusFunction::ReadCoils, 300, 8);
-            match transport.request(&read_request).await {
-                Ok(read_response) => {
-                    if read_response.data.len() >= 2 {
-                        print!("  🔍 验证读取: ");
-                        for i in 0..8 {
-                            let bit_value = (read_response.data[1] & (1 << i)) != 0;
-                            print!("{}", if bit_value { "1" } else { "0" });
-                        }
-                        println!(" (预期: 10101010)");
-                    }
-                }
-                Err(e) => {
-                    println!("  ⚠️  验证读取失败: {}", e);
-                }
+            println!("  ✅ Write multiple coils successful");
+            if response.data.len() >= 4 {
+                let address = u16::from_be_bytes([response.data[0], response.data[1]]);
+                let quantity = u16::from_be_bytes([response.data[2], response.data[3]]);
+                println!("  📍 Address: {}", address);
+                println!("  📊 Quantity: {} coils", quantity);
             }
         }
         Err(e) => {
-            println!("  ❌ 写入多个线圈失败: {}", e);
+            println!("  ❌ Write multiple coils failed: {}", e);
         }
     }
+    
+    // Test reading back the written values
+    println!("  🔄 Verifying written values...");
+    let read_request = ModbusRequest::new_read(1, ModbusFunction::ReadCoils, 300, 8);
+    
+    match transport.request(&read_request).await {
+        Ok(response) => {
+            if !response.data.is_empty() && response.data.len() >= 2 {
+                print!("  ✅ Verification successful. Coil pattern: ");
+                for i in 0..8 {
+                    let bit_value = (response.data[1] & (1 << i)) != 0;
+                    print!("{}", if bit_value { "1" } else { "0" });
+                }
+                println!();
+            }
+        }
+        Err(e) => {
+            println!("  ⚠️  Verification failed: {}", e);
+        }
+    }
+    
     Ok(())
 }
 
 async fn test_write_multiple_registers(transport: &mut TcpTransport) -> ModbusResult<()> {
-    // 创建写入多个寄存器的请求
-    let test_values: Vec<u16> = vec![0x1111, 0x2222, 0x3333];
-    let mut data = Vec::new();
-    data.push(6); // 字节数 (3个寄存器 * 2字节)
-    
-    for value in &test_values {
-        data.extend_from_slice(&value.to_be_bytes());
-    }
-    
+    // Create write multiple registers request
     let request = ModbusRequest {
         slave_id: 1,
         function: ModbusFunction::WriteMultipleRegisters,
         address: 400,
         quantity: 3,
-        data,
+        data: vec![
+            0x06,       // Byte count (3 registers × 2 bytes = 6)
+            0x11, 0x11, // Register 400: 0x1111
+            0x22, 0x22, // Register 401: 0x2222
+            0x33, 0x33, // Register 402: 0x3333
+        ],
     };
     
     match transport.request(&request).await {
         Ok(response) => {
-            println!("  ✅ 写入多个寄存器成功");
-            println!("  📝 写入地址400-402, 值: 0x1111, 0x2222, 0x3333");
-            println!("  📦 响应数据长度: {} bytes", response.data.len());
-            
-            // 验证写入 - 读取刚写入的寄存器
-            let read_request = ModbusRequest::new_read(1, ModbusFunction::ReadHoldingRegisters, 400, 3);
-            match transport.request(&read_request).await {
-                Ok(read_response) => {
-                    if read_response.data.len() >= 7 {
-                        print!("  🔍 验证读取: ");
-                        for i in 0..3 {
-                            let offset = 1 + i * 2;
-                            let value = u16::from_be_bytes([read_response.data[offset], read_response.data[offset + 1]]);
-                            print!("0x{:04X} ", value);
-                        }
-                        println!("(预期: 0x1111 0x2222 0x3333)");
-                    }
-                }
-                Err(e) => {
-                    println!("  ⚠️  验证读取失败: {}", e);
-                }
+            println!("  ✅ Write multiple registers successful");
+            if response.data.len() >= 4 {
+                let address = u16::from_be_bytes([response.data[0], response.data[1]]);
+                let quantity = u16::from_be_bytes([response.data[2], response.data[3]]);
+                println!("  📍 Address: {}", address);
+                println!("  📊 Quantity: {} registers", quantity);
             }
         }
         Err(e) => {
-            println!("  ❌ 写入多个寄存器失败: {}", e);
+            println!("  ❌ Write multiple registers failed: {}", e);
         }
     }
+    
+    // Test reading back the written values
+    println!("  🔄 Verifying written values...");
+    let read_request = ModbusRequest::new_read(1, ModbusFunction::ReadHoldingRegisters, 400, 3);
+    
+    match transport.request(&read_request).await {
+        Ok(response) => {
+            if response.data.len() >= 7 { // 1 byte count + 6 bytes data
+                print!("  ✅ Verification successful. Register values: ");
+                for i in 0..3 {
+                    let offset = 1 + i * 2;
+                    let value = u16::from_be_bytes([response.data[offset], response.data[offset + 1]]);
+                    print!("0x{:04x} ", value);
+                }
+                println!();
+            }
+        }
+        Err(e) => {
+            println!("  ⚠️  Verification failed: {}", e);
+        }
+    }
+    
     Ok(())
 } 

@@ -25,7 +25,7 @@ impl Default for TestConfig {
     fn default() -> Self {
         Self {
             server_address: "127.0.0.1:5020".to_string(),
-            timeout_ms: 3000, // 优化为3秒超时，更适合本地测试
+            timeout_ms: 3000, // Optimized to 3 second timeout, better for local testing
             max_concurrent: 20, // More conservative concurrency
             warmup_requests: 10,
         }

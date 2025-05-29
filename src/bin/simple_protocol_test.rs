@@ -14,19 +14,19 @@ async fn main() -> ModbusResult<()> {
         .filter_level(log::LevelFilter::Info)
         .init();
 
-    println!("🔧 Modbus协议修复验证测试");
-    println!("========================");
+    println!("🔧 Modbus Protocol Verification Test");
+    println!("====================================");
     
     let address = "127.0.0.1:5020".parse()
-        .map_err(|e| voltage_modbus::error::ModbusError::invalid_data(format!("地址解析错误: {}", e)))?;
+        .map_err(|e| voltage_modbus::error::ModbusError::invalid_data(format!("Address parse error: {}", e)))?;
     let timeout = Duration::from_millis(3000);
     
-    println!("📡 连接到测试服务器 {}...", address);
+    println!("📡 Connecting to test server {}...", address);
     let mut transport = TcpTransport::new(address, timeout).await?;
-    println!("✅ 连接成功！");
+    println!("✅ Connection successful!");
     
-    // 测试1: 基本读取保持寄存器
-    println!("\n🧪 测试1: 读取保持寄存器 (地址0, 数量5)");
+    // Test 1: Basic holding register read
+    println!("\n🧪 Test 1: Read Holding Registers (address 0, quantity 5)");
     let request = ModbusRequest::new_read(
         1,
         ModbusFunction::ReadHoldingRegisters,
@@ -34,16 +34,16 @@ async fn main() -> ModbusResult<()> {
         5,
     );
     
-    println!("📤 发送请求: Unit=1, Func=0x03, Addr=0, Qty=5");
+    println!("📤 Sending request: Unit=1, Func=0x03, Addr=0, Qty=5");
     match transport.request(&request).await {
         Ok(response) => {
-            println!("✅ 响应成功! 数据长度: {} 字节", response.data.len());
+            println!("✅ Response successful! Data length: {} bytes", response.data.len());
             if response.data.len() >= 1 {
                 let byte_count = response.data[0];
-                println!("📊 字节计数: {}", byte_count);
+                println!("📊 Byte count: {}", byte_count);
                 
                 if response.data.len() >= (1 + byte_count as usize) {
-                    print!("📋 寄存器值: ");
+                    print!("📋 Register values: ");
                     for i in 0..(byte_count as usize / 2) {
                         let reg_offset = 1 + i * 2;
                         if reg_offset + 1 < response.data.len() {
@@ -56,17 +56,17 @@ async fn main() -> ModbusResult<()> {
                     }
                     println!();
                 } else {
-                    println!("⚠️  响应数据不完整");
+                    println!("⚠️  Response data incomplete");
                 }
             }
         }
         Err(e) => {
-            println!("❌ 请求失败: {}", e);
+            println!("❌ Request failed: {}", e);
         }
     }
     
-    // 测试2: 不同地址读取
-    println!("\n🧪 测试2: 读取保持寄存器 (地址10, 数量3)");
+    // Test 2: Different address read
+    println!("\n🧪 Test 2: Read Holding Registers (address 10, quantity 3)");
     let request2 = ModbusRequest::new_read(
         1,
         ModbusFunction::ReadHoldingRegisters,
@@ -76,15 +76,15 @@ async fn main() -> ModbusResult<()> {
     
     match transport.request(&request2).await {
         Ok(response) => {
-            println!("✅ 第二次请求成功! 数据长度: {} 字节", response.data.len());
+            println!("✅ Second request successful! Data length: {} bytes", response.data.len());
         }
         Err(e) => {
-            println!("❌ 第二次请求失败: {}", e);
+            println!("❌ Second request failed: {}", e);
         }
     }
     
-    // 测试3: 边界情况
-    println!("\n🧪 测试3: 单个寄存器读取 (地址50, 数量1)");
+    // Test 3: Edge case
+    println!("\n🧪 Test 3: Single Register Read (address 50, quantity 1)");
     let request3 = ModbusRequest::new_read(
         1,
         ModbusFunction::ReadHoldingRegisters,
@@ -94,22 +94,22 @@ async fn main() -> ModbusResult<()> {
     
     match transport.request(&request3).await {
         Ok(response) => {
-            println!("✅ 单寄存器读取成功! 数据长度: {} 字节", response.data.len());
+            println!("✅ Single register read successful! Data length: {} bytes", response.data.len());
         }
         Err(e) => {
-            println!("❌ 单寄存器读取失败: {}", e);
+            println!("❌ Single register read failed: {}", e);
         }
     }
     
-    // 获取并显示传输统计
+    // Get and display transport statistics
     let stats = transport.get_stats();
-    println!("\n📊 传输统计:");
-    println!("  发送请求: {}", stats.requests_sent);
-    println!("  收到响应: {}", stats.responses_received);
-    println!("  发送字节: {} bytes", stats.bytes_sent);
-    println!("  接收字节: {} bytes", stats.bytes_received);
-    println!("  错误次数: {}", stats.errors);
-    println!("  超时次数: {}", stats.timeouts);
+    println!("\n📊 Transport Statistics:");
+    println!("  Requests sent: {}", stats.requests_sent);
+    println!("  Responses received: {}", stats.responses_received);
+    println!("  Bytes sent: {} bytes", stats.bytes_sent);
+    println!("  Bytes received: {} bytes", stats.bytes_received);
+    println!("  Error count: {}", stats.errors);
+    println!("  Timeout count: {}", stats.timeouts);
     
     transport.close().await?;
     
@@ -119,22 +119,22 @@ async fn main() -> ModbusResult<()> {
         0.0
     };
     
-    println!("\n🎯 协议修复验证结果:");
+    println!("\n🎯 Protocol Verification Results:");
     if success_rate >= 99.0 && stats.errors == 0 {
-        println!("  ✅ 协议修复成功! 成功率: {:.1}%", success_rate);
-        println!("  ✅ PDU长度计算正确");
-        println!("  ✅ 超时设置合理");
-        println!("  ✅ 协议兼容性良好");
+        println!("  ✅ Protocol verification successful! Success rate: {:.1}%", success_rate);
+        println!("  ✅ PDU length calculation correct");
+        println!("  ✅ Timeout settings reasonable");
+        println!("  ✅ Protocol compatibility good");
     } else if success_rate >= 90.0 {
-        println!("  🟡 协议基本正常, 成功率: {:.1}%", success_rate);
+        println!("  🟡 Protocol basically normal, success rate: {:.1}%", success_rate);
         if stats.errors > 0 {
-            println!("  ⚠️  仍有 {} 个错误需要关注", stats.errors);
+            println!("  ⚠️  Still have {} errors that need attention", stats.errors);
         }
     } else {
-        println!("  🔴 协议修复需要进一步优化, 成功率: {:.1}%", success_rate);
-        println!("  🔴 错误次数: {}", stats.errors);
+        println!("  🔴 Protocol needs further optimization, success rate: {:.1}%", success_rate);
+        println!("  🔴 Error count: {}", stats.errors);
     }
     
-    println!("\n✅ 协议验证测试完成!");
+    println!("\n✅ Protocol verification test completed!");
     Ok(())
 } 

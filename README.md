@@ -292,7 +292,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Built with ❤️ by Evan Liu for the Rust and Industrial Automation communities.**
-
----
-
-**📝 Note**: 一些徽章（Crates.io、docs.rs）将在包发布后显示。详见 [BADGE_EXPLANATION.md](./BADGE_EXPLANATION.md)
