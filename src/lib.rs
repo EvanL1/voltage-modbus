@@ -35,15 +35,13 @@
 //! ### Client Example
 //! 
 //! ```rust,no_run
-//! use voltage_modbus::{ModbusClient, ModbusResult};
+//! use voltage_modbus::{ModbusTcpClient, ModbusClient, ModbusResult};
 //! use std::time::Duration;
 //! 
 //! #[tokio::main]
 //! async fn main() -> ModbusResult<()> {
 //!     // Connect to Modbus TCP server
-//!     let address = "127.0.0.1:502".parse().unwrap();
-//!     let timeout = Duration::from_secs(5);
-//!     let mut client = ModbusClient::new_tcp(address, timeout).await?;
+//!     let mut client = ModbusTcpClient::with_timeout("127.0.0.1:502", Duration::from_secs(5)).await?;
 //!     
 //!     // Read holding registers
 //!     let values = client.read_holding_registers(1, 0, 10).await?;
